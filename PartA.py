@@ -3,6 +3,12 @@ import json
 import pprint
 from pprint import pprint
 
+# Function for cleaner display format - Miyoko
+def print_in_chunks(token_list, chunk_size=5):
+    for i in range(0, len(token_list), chunk_size):
+        print(token_list[i:i+chunk_size])
+
+
 # Data_1.txt Import
 with open("Data_1.txt", "r", encoding="utf-8") as file:
     data_1 = file.read()
@@ -13,7 +19,7 @@ print('Q1 split function')
 start = time.time()
 tokenization_1 = data_1.split()
 end = time.time()
-pprint(tokenization_1, width=100)
+print_in_chunks(tokenization_1, 5)
 print(f"Time taken: {end - start:.4f} seconds")
 
 # Regular Expression function - Yi Jing
@@ -42,7 +48,7 @@ start = time.time()
 ps = PorterStemmer()
 porter_stems = [ps.stem(w) for w in word_tokenize(data_1)]
 end = time.time()
-pprint(porter_stems, width=100)
+print_in_chunks(porter_stems, 5)
 print(f"Time taken: {end - start:.4f} seconds")
 
 # NLTK LancasterStemmer function - Shu Hui
@@ -68,7 +74,7 @@ start = time.time()
 blob = TextBlob(data_2)
 blob_pos = blob.tags
 end = time.time()
-pprint(blob_pos, width=100)
+print_in_chunks(blob_pos, 5)
 print(f"Time taken: {end - start:.4f} seconds")
 
 # Regular Expression tagger - Yi Jing
