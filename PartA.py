@@ -1,3 +1,14 @@
+import time
+import json
+import pprint
+from pprint import pprint
+
+# Function for cleaner display format - Miyoko
+def print_in_chunks(token_list, chunk_size=5):
+    for i in range(0, len(token_list), chunk_size):
+        print(token_list[i:i+chunk_size])
+
+
 # Data_1.txt Import
 with open("Data_1.txt", "r", encoding="utf-8") as file:
     data_1 = file.read()
@@ -5,8 +16,11 @@ with open("Data_1.txt", "r", encoding="utf-8") as file:
 # Q1 Word Tokenization
 # split() function
 print('Q1 split function')
+start = time.time()
 tokenization_1 = data_1.split()
-print(tokenization_1)
+end = time.time()
+print_in_chunks(tokenization_1, 5)
+print(f"Time taken: {end - start:.4f} seconds")
 
 # Regular Expression function - Yi Jing
 print('Q1 RE function')
@@ -37,9 +51,12 @@ nltk.download('punkt_tab')
 from nltk.stem import PorterStemmer, LancasterStemmer
 from nltk.tokenize import word_tokenize
 
+start = time.time()
 ps = PorterStemmer()
-words = word_tokenize(data_1)
-print([ps.stem(w) for w in words])
+porter_stems = [ps.stem(w) for w in word_tokenize(data_1)]
+end = time.time()
+print_in_chunks(porter_stems, 5)
+print(f"Time taken: {end - start:.4f} seconds")
 
 # NLTK LancasterStemmer function - Shu Hui
 import nltk
@@ -69,8 +86,13 @@ print(pos_tag)
 print('Q3 TextBlob POS Tagger')
 nltk.download('averaged_perceptron_tagger_eng')
 from textblob import TextBlob
+
+start = time.time()
 blob = TextBlob(data_2)
-print(blob.tags)
+blob_pos = blob.tags
+end = time.time()
+print_in_chunks(blob_pos, 5)
+print(f"Time taken: {end - start:.4f} seconds")
 
 # Regular Expression tagger - Yi Jing
 print('Q3 Regular Expression POS Tagger')
