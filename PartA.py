@@ -14,6 +14,13 @@ print('Q1 RE function')
 
 # NLTK function - Shu Hui 
 print('Q1 NLTK function')
+import nltk
+nltk.download('punkt')
+from nltk.tokenize import word_tokenize
+tokenization = word_tokenize(data_1)
+print(tokenization)
+
+
 
 
 print('-----------------------------')
@@ -27,7 +34,7 @@ print('Q2 RE function')
 print('Q2 PorterStemmer function')
 import nltk
 nltk.download('punkt_tab')
-from nltk.stem import PorterStemmer
+from nltk.stem import PorterStemmer, LancasterStemmer
 from nltk.tokenize import word_tokenize
 
 ps = PorterStemmer()
@@ -35,7 +42,13 @@ words = word_tokenize(data_1)
 print([ps.stem(w) for w in words])
 
 # NLTK LancasterStemmer function - Shu Hui
+import nltk
+from nltk.stem import LancasterStemmer
 print('Q2 LancasterStemmer function')
+ls = LancasterStemmer()
+words = word_tokenize(data_1)
+print([ls.stem(w) for w in words])
+
 
 
 # Data_2.txt Import
@@ -46,6 +59,10 @@ print('-----------------------------')
 # Q3 POS Taggers and Syntactic Analysers
 # NLTK POS tagger function - Shu Hui
 print('Q3 NLTK POS Tagger')
+import nltk
+from nltk import pos_tag, word_tokenize
+pos_nltk = pos_tag(data_2)
+print(pos_tag)
 
 
 # TextBlob POS Tagger
