@@ -24,7 +24,19 @@ print(f"Time taken: {end - start:.4f} seconds")
 
 # Regular Expression function - Yi Jing
 print('Q1 RE function')
+import re
+import time
 
+start_time = time.time()
+tokens = re.findall(r'\b\w+\b', text)
+end_time = time.time()
+
+for i in range(0, len(tokens), 10):
+    print(', '.join(tokens[i:i+10]))
+print(f"\nTotal number of tokens: {len(tokens)}")
+
+elapsed_time = end_time - start_time
+print(f"\nTime taken: {elapsed_time:.4f} seconds")
 
 # NLTK function - Shu Hui 
 print('Q1 NLTK function')
@@ -35,14 +47,31 @@ tokenization = word_tokenize(data_1)
 print(tokenization)
 
 
-
-
 print('-----------------------------')
 
 # Q2 Form Word Stemming
 # Regular Expression function - Yi Jing
 print('Q2 RE function')
+import re
+import time
 
+start_time = time.time()
+
+tokens = re.findall(r'\b\w+\b', data_1)
+
+def simple_stem(word):
+    word = re.sub(r'(ing|ed|ly|es|s)$', '', word)
+    return word
+
+stemmed_tokens = [simple_stem(token.lower()) for token in tokens]
+
+end_time = time.time()
+
+for i in range(0, len(stemmed_tokens), 10):
+    print(', '.join(stemmed_tokens[i:i+10]))
+
+elapsed_time = end_time - start_time
+print(f"\nTime taken: {elapsed_time:.4f} seconds")
 
 # NLTK PorterStemmer function
 print('Q2 PorterStemmer function')
@@ -96,7 +125,39 @@ print(f"Time taken: {end - start:.4f} seconds")
 
 # Regular Expression tagger - Yi Jing
 print('Q3 Regular Expression POS Tagger')
+import nltk
+from nltk.tag import RegexpTagger
+from nltk.tokenize import word_tokenize
+import time
 
+start_time = time.time()
+
+tokens = word_tokenize(data_2)
+
+patterns = [
+    (r'.*ing$', 'VBG'),      # gerunds
+    (r'.*ed$', 'VBD'),       # past tense verbs
+    (r'.*es$', 'VBZ'),       # 3rd person singular present
+    (r'.*ould$', 'MD'),      # modals
+    (r'.*\'s$', 'NN$'),      # possessive nouns
+    (r'.*s$', 'NNS'),        # plural nouns
+    (r'^-?[0-9]+(.[0-9]+)?$', 'CD'),  # numbers
+    (r'^(the|a|an)$', 'DT'), # articles
+    (r'^(and|or|but)$', 'CC'), # conjunctions
+    (r'^(at|in|on|with|away)$', 'IN'), # prepositions
+    (r'.*', 'NN')            # default
+]
+
+regexp_tagger = RegexpTagger(patterns)
+tagged = regexp_tagger.tag(tokens)
+
+end_time = time.time()
+elapsed_time = end_time - start_time
+
+for word, tag in tagged:
+    print(f"{word:<10} => {tag}")
+
+print(f"\nTime taken: {elapsed_time:.4f} seconds")
 
 print('-----------------------------')
 # Q4 Sentence Probabilities
