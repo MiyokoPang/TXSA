@@ -5,6 +5,8 @@ from pprint import pprint
 import nltk
 from textblob import TextBlob
 import re
+import string
+from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer, LancasterStemmer
 from nltk import pos_tag, FreqDist, ConditionalFreqDist, CFG
@@ -60,7 +62,43 @@ print(f"Time taken: {(end - start) * 1000000:.2f} ms")
 print('-----------------------------')
 
 # Q1.3: Stop Words & Punctuation Removal - Yi Jing
+print("Q1.3 Stop Words & Punctuation Removal")
+start_time = time.time()
 
+# Tokenize
+tokens = word_tokenize(data_1)
+
+# Prepare stop words and punctuation
+stop_words = set(stopwords.words('english'))
+punctuation = set(string.punctuation)
+
+# Remove stop words and punctuation
+filtered_tokens = []
+found_stopwords = []
+
+for word in tokens:
+    word_lower = word.lower()
+    if word_lower in stop_words:
+        found_stopwords.append(word_lower)
+    elif word not in punctuation:
+        filtered_tokens.append(word)
+
+end_time = time.time()
+
+# Print results
+print("Original Token Count:", len(tokens))
+print("Filtered Token Count:", len(filtered_tokens))
+
+print("\nFiltered Tokens:")
+for i in range(0, len(filtered_tokens), 10):
+    print(' '.join(filtered_tokens[i:i+10]))
+
+print("\nStop Words Found and Removed:")
+for i in range(0, len(found_stopwords), 10):
+    print(', '.join(found_stopwords[i:i+10]))
+
+print(f"\nTotal Stop Words Removed: {len(found_stopwords)}")
+print(f"Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
 # Q2 Form Word Stemming
 # Regular Expression function - Yi Jing
