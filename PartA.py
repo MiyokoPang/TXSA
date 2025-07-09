@@ -7,9 +7,11 @@ from textblob import TextBlob
 import re
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer, LancasterStemmer
-from nltk import pos_tag, bigrams, FreqDist, ConditionalFreqDist
+from nltk import pos_tag, FreqDist, ConditionalFreqDist, CFG
+from nltk.util import bigrams
 from nltk.tag import RegexpTagger
 from nltk.probability import ConditionalProbDist, MLEProbDist, LidstoneProbDist
+from nltk.parse.chart import ChartParser
 
 # Downloads
 nltk.download('punkt')
@@ -150,12 +152,86 @@ print(f"\nTime taken: {(end_time - start_time) * 1000000:.2f} ms")
 
 print('-----------------------------')
 
+# Possible Parse Trees - Miyoko and Yi Jing
+sentence = re.sub(r'[^\w\s]', '', data_2).lower().split()
+print("Tokens:", sentence)
+grammar = CFG.fromstring("""
+  S -> NP VP
+  NP -> Det Adj Adj N
+  NP -> Det Adj N
+  VP -> V PP Conj V Adv
+  PP -> P NP
+  Det -> 'the'
+  Adj -> 'big' | 'black' | 'white'
+  N -> 'dog' | 'cat'
+  V -> 'barked' | 'chased'
+  P -> 'at'
+  Conj -> 'and'
+  Adv -> 'away'
+""")
+parser = ChartParser(grammar)
+start = time.time()
+trees = list(parser.parse(sentence))
+end = time.time()
+if not trees:
+    print("No valid parse tree could be generated.")
+else:
+    for tree in trees:
+        tree.pretty_print()
+        tree.draw()
+print(f"\nTime taken to generate parse tree: {(end - start) * 1000000:.2f} ms")
+
+# -----------------------------
+# Data_3.txt Import
+# -----------------------------
+with open("Data_3.txt", "r", encoding="utf-8") as file:
+    data_3 = file.read()
+
+print('-----------------------------')
+
 # Q4 Sentence Probabilities - Bigram Models
 print('Q4 Unsmoothed and Smoothed Bigram Model')
+all_sentences = re.findall(r"<s>.*?</s>", data_3)
+test_sentence = all_sentences[-1]
+train_sentences = all_sentences[:-1]
+train_data = []
+for s in train_sentences:
+    tokens = s.replace('<s>', '').replace('</s>', '').strip().split()
+    train_data.append(["<s>"] + tokens + ["</s>"])
+train_tokens = [token for sent in train_data for token in sent]
+
+train_bigrams = list(bigrams(train_tokens))
+cfd = ConditionalFreqDist(train_bigrams)
+unsmoothed_model = ConditionalProbDist(cfd, MLEProbDist)
+smoothed_model = ConditionalProbDist(cfd, lambda fd: LidstoneProbDist(fd, 0.1))
+test_tokens = test_sentence.replace('<s>', '').replace('</s>', '').strip().split()
+test_tokens = ["<s>"] + test_tokens + ["</s>"]
+
+def calc_prob(sentence_tokens, model, label=""):
+    prob = 1.0
+    print(f"\n{label} Bigram Probabilities:")
+    for w1, w2 in bigrams(sentence_tokens):
+        p = model[w1].prob(w2)
+        print(f"P({w2} | {w1}) = {p:.10f}")
+        prob *= p
+    print(f"{label} Sentence Probability = {prob:.10f}")
+
+calc_prob(test_tokens, unsmoothed_model, "[Unsmoothed MLE]")
+calc_prob(test_tokens, smoothed_model, "[Smoothed Lidstone]")
+
+print('-----------------------------')
 
 # Q5 Individual Work Assignments
-# Miyoko Pang 
-
+# Miyoko Pang
+print('Q5 TreebankWordTokenizer function')
+from nltk.tokenize import TreebankWordTokenizer
+data_1_clean = data_1.replace('\n', ' ').strip()
+start = time.time()
+treebank_tokenizer = TreebankWordTokenizer()
+tokens = treebank_tokenizer.tokenize(data_1_clean)
+end = time.time()
+print_in_chunks(tokens, 5)
+print(f"Time taken: {(end - start) * 1000000:.2f} ms")
 
 # Yi Jing     
 
