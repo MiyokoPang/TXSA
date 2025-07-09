@@ -237,3 +237,17 @@ print(f"Time taken: {(end - start) * 1000000:.2f} ms")
 
 
 # Shu Hui     
+print('Q5 Alternative Tokenizer - WordPunctTokenizer')
+from nltk.tokenize import WordPunctTokenizer
+import time
+
+# Clean the data
+data_1_clean2 = data_1.replace('\n', ' ').strip()
+
+start = time.time()
+wordpunct_tokenizer = WordPunctTokenizer()
+tokens = wordpunct_tokenizer.tokenize(data_1_clean2)
+end = time.time()
+
+print_in_chunks(tokens, 5)
+print(f"Time taken: {(end - start) * 1000000:.2f} ms")
