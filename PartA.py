@@ -45,11 +45,9 @@ start_time = time.time()
 tokens = re.findall(r'\b\w+\b', data_1)
 end_time = time.time()
 
-for i in range(0, len(tokens), 10):
-    print(', '.join(tokens[i:i+10]))
-
+print_in_chunks(tokens)
 print(f"\nTotal number of tokens: {len(tokens)}")
-print(f"Time taken: {(end_time - start_time) * 1000000:.2f} ms")
+print(f"Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
 # NLTK function - Shu Hui
 print('Q1 NLTK function')
