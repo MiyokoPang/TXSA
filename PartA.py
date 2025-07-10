@@ -88,12 +88,10 @@ print("Original Token Count:", len(tokens))
 print("Filtered Token Count:", len(filtered_tokens))
 
 print("\nFiltered Tokens:")
-for i in range(0, len(filtered_tokens), 10):
-    print(' '.join(filtered_tokens[i:i+10]))
+print_in_chunks(filtered_tokens)
 
 print("\nStop Words Found and Removed:")
-for i in range(0, len(found_stopwords), 10):
-    print(', '.join(found_stopwords[i:i+10]))
+print_in_chunks(found_stopwords)
 
 print(f"\nTotal Stop Words Removed: {len(found_stopwords)}")
 print(f"Time taken: {(end_time - start_time) * 1000000:.2f} µs")
@@ -110,10 +108,9 @@ def simple_stem(word):
 stemmed_tokens = [simple_stem(token.lower()) for token in tokens]
 end_time = time.time()
 
-for i in range(0, len(stemmed_tokens), 10):
-    print(', '.join(stemmed_tokens[i:i+10]))
+print_in_chunks(stemmed_tokens)
 
-print(f"Time taken: {(end_time - start_time) * 1000000:.2f} ms")
+print(f"Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
 # NLTK PorterStemmer function - Miyoko Pang
 print('Q2 PorterStemmer function')
@@ -269,8 +266,22 @@ end = time.time()
 print_in_chunks(tokens, 5)
 print(f"Time taken: {(end - start) * 1000000:.2f} ms")
 
-# Yi Jing     
+# Yi Jing
+print("Q5 spaCy Tokenizer")
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
+# Clean newline and extra whitespace
+clean_data_1 = re.sub(r'\s+', ' ', data_1.strip())
+
+start = time.time()
+doc = nlp(clean_data_1)
+tokens = [token.text for token in doc]
+end = time.time()
+
+print_in_chunks(tokens)
+print(f"\nTotal Tokens: {len(tokens)}")
+print(f"Time taken: {(end - start) * 1000000:.2f} µs")
 
 # Shu Hui     
 print('Q5 Alternative Tokenizer - WordPunctTokenizer')
