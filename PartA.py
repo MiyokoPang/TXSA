@@ -14,6 +14,9 @@ from nltk.util import bigrams
 from nltk.tag import RegexpTagger
 from nltk.probability import ConditionalProbDist, MLEProbDist, LidstoneProbDist
 from nltk.parse.chart import ChartParser
+from nltk.lm import MLE, Laplace
+from nltk.lm.preprocessing import padded_everygram_pipeline
+from nltk.util import ngrams
 
 # Downloads
 nltk.download('punkt')
@@ -224,33 +227,37 @@ print('-----------------------------')
 
 # Q4 Sentence Probabilities - Bigram Models
 print('Q4 Unsmoothed and Smoothed Bigram Model')
-all_sentences = re.findall(r"<s>.*?</s>", data_3)
+all_sentences = re.findall(r"<s>.*?</s>", data_3) # Extract wrapped sentences
 test_sentence = all_sentences[-1]
 train_sentences = all_sentences[:-1]
-train_data = []
-for s in train_sentences:
-    tokens = s.replace('<s>', '').replace('</s>', '').strip().split()
-    train_data.append(["<s>"] + tokens + ["</s>"])
-train_tokens = [token for sent in train_data for token in sent]
+tokenized_train = [['<s>'] + s.replace('<s>', '').replace('</s>', '').strip().split() + ['</s>'] for s in train_sentences]
 
-train_bigrams = list(bigrams(train_tokens))
-cfd = ConditionalFreqDist(train_bigrams)
-unsmoothed_model = ConditionalProbDist(cfd, MLEProbDist)
-smoothed_model = ConditionalProbDist(cfd, lambda fd: LidstoneProbDist(fd, 0.1))
-test_tokens = test_sentence.replace('<s>', '').replace('</s>', '').strip().split()
-test_tokens = ["<s>"] + test_tokens + ["</s>"]
+# Bigram Models (MLE and Laplace)
+start = time.time()
+n = 2
+train_data_mle, padded_sents_mle = padded_everygram_pipeline(n, tokenized_train)
+train_data_laplace, padded_sents_laplace = padded_everygram_pipeline(n, tokenized_train)
+mle_model = MLE(n)
+laplace_model = Laplace(n)
+mle_model.fit(train_data_mle, padded_sents_mle)
+laplace_model.fit(train_data_laplace, padded_sents_laplace)
+test_tokens = ['<s>'] + test_sentence.replace('<s>', '').replace('</s>', '').strip().split() + ['</s>']
+test_ngrams = list(ngrams(test_tokens, n))
 
-def calc_prob(sentence_tokens, model, label=""):
-    prob = 1.0
-    print(f"\n{label} Bigram Probabilities:")
-    for w1, w2 in bigrams(sentence_tokens):
-        p = model[w1].prob(w2)
-        print(f"P({w2} | {w1}) = {p:.10f}")
-        prob *= p
-    print(f"{label} Sentence Probability = {prob:.10f}")
-
-calc_prob(test_tokens, unsmoothed_model, "[Unsmoothed MLE]")
-calc_prob(test_tokens, smoothed_model, "[Smoothed Lidstone]")
+# Calculate probabilities
+prob_mle = 1.0
+prob_laplace = 1.0
+for w1, w2 in test_ngrams:
+    mle_score = mle_model.score(w2, [w1])
+    laplace_score = laplace_model.score(w2, [w1])
+    print(f"Bigram ({w1}, {w2}): MLE={mle_score:.10f}, Laplace={laplace_score:.10f}")  # Debug line
+    prob_mle *= mle_score
+    prob_laplace *= laplace_score
+end = time.time()
+print(f"Test Sentence: {' '.join(test_tokens)}")
+print(f"MLE Bigram Probability: {prob_mle:.10f}")
+print(f"Laplace-smoothed Bigram Probability: {prob_laplace:.10f}")
+print(f"\nTime taken to generate bigram probabilities: {(end - start) * 1000:.2f} ms")
 
 print('-----------------------------')
 
