@@ -1,32 +1,48 @@
+# -----------------------------
+# Q1: Preprocessing and Exploratory Data Analysis
+# -----------------------------
+# Shu Hui
+print("Q1: Preprocessing and Exploratory Data Analysis - Shu Hui")
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-# Load data
-df = pd.read_csv("C:/Users/User/Downloads/sentiment_tweets3.csv/sentiment_tweets3.csv")
-df.columns = ['Index', 'message', 'label']
-
+import time
+from pathlib import Path
 import re
-import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
+from collections import Counter
 
-# Download NLTK resources 
+# Function to print in chunks
+def print_in_chunks(token_list, chunk_size=5):
+    for i in range(0, len(token_list), chunk_size):
+        print(token_list[i:i+chunk_size])
+
+# Download required resources
+import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
 
-# Step 1: Clean raw text
-def clean_text(text):
-    text = re.sub(r"http\S+|www\S+|https\S+", '', text)  # Remove URLs
-    text = re.sub(r'\@\w+|\#', '', text)                 # Remove @
-    text = re.sub(r'[^\w\s]', '', text)                  # Remove punctuation
-    text = text.lower()                                  # Convert to lowercase
-    return text
+# Load dataset
+print("Loading dataset...")
+path_dir = Path(__file__).resolve().parent
+df_dir = path_dir / "sentiment_tweets3.csv"
+df = pd.read_csv(df_dir)
+df.columns = ['Index', 'message', 'label']
 
+# Step 1: Clean raw text 
+def clean_text(text):
+    text = re.sub(r"http\S+|www\S+|https\S+", '', text)
+    text = re.sub(r'\@\w+|\#', '', text)
+    text = re.sub(r'[^\w\s]', '', text)
+    return text.lower()
+
+print("Cleaning text...")
 df['clean_message'] = df['message'].astype(str).apply(clean_text)
 
-# Step 2: Remove stopwords + apply stemming
+# Step 2: Stopwords removal and stemming 
 stop_words = set(stopwords.words('english'))
 stemmer = PorterStemmer()
 
@@ -35,33 +51,32 @@ def preprocess_text(text):
     filtered = [stemmer.stem(word) for word in tokens if word not in stop_words]
     return ' '.join(filtered)
 
-# Add new column with processed message
+print("Preprocessing text (stopword removal + stemming)")
 df['processed_message'] = df['clean_message'].apply(preprocess_text)
 
-# 1. Basic class distribution
 
+# 1. Class Distribution 
+print("\nQ1.1: Class Distribution")
 label_counts = df['label'].value_counts()
-print("\nLabel Distribution:")
 for label, count in label_counts.items():
     label_name = "Not Depressed" if label == 0 else "Depressed"
     print(f"{label} ({label_name}): {count} tweets")
 
-# Pie chart view
+# Pie chart
 plt.figure(figsize=(6,6))
 plt.pie(label_counts, labels=['Not Depressed (0)', 'Depressed (1)'], autopct='%1.1f%%', startangle=90)
 plt.title("Tweet Label Distribution")
 plt.axis('equal')
 plt.show()
 
-# 2. Average tweet length by label
-
+# 2. Average Tweet Length 
+print("\nQ1.2: Average Tweet Length by Label")
 df['tweet_length'] = df['message'].astype(str).apply(len)
 avg_lengths = df.groupby('label')['tweet_length'].mean()
-print("\nAverage Tweet Length by Label:")
 print(f"Not Depressed (0): {avg_lengths[0]:.2f} characters")
 print(f"Depressed (1): {avg_lengths[1]:.2f} characters")
 
-# Visual comparison
+# Bar chart
 plt.figure(figsize=(6,4))
 sns.barplot(x=avg_lengths.index, y=avg_lengths.values)
 plt.xticks([0, 1], ['Not Depressed', 'Depressed'])
@@ -69,30 +84,113 @@ plt.ylabel("Average Tweet Length")
 plt.title("Average Tweet Length by Label")
 plt.show()
 
-# 3. Show Top 20 Most Frequent Words
-
-from collections import Counter
-import matplotlib.pyplot as plt
-
-# Combine all processed tweets into one big string and split into words
+# 3. Top 20 Frequent Words 
+print("\nQ1.3: Top 20 Most Frequent Words")
 all_words = ' '.join(df['processed_message']).split()
-
-# Count the 20 most common words
 common_words = Counter(all_words).most_common(20)
 
-# Print top 20 most frequent words
-print("\nTop 20 Most Frequent Words:")
 for word, count in common_words:
     print(f"{word}: {count}")
 
-# Separate words and their counts for plotting
+# Plot
 words = [word for word, count in common_words]
 counts = [count for word, count in common_words]
 
-# Plot horizontal bar chart
 plt.figure(figsize=(10, 6))
-plt.barh(words[::-1], counts[::-1], color='skyblue')  # Reverse for highest word on top
+plt.barh(words[::-1], counts[::-1], color='skyblue')
 plt.xlabel('Frequency')
 plt.title('Top 20 Most Frequent Words in Tweets')
 plt.tight_layout()
 plt.show()
+
+print("-------------------")
+
+# -----------------------------
+# Individual Section: Q2: Supervised Text Classification Model + Q3: Hyper Parameter Selection
+# -----------------------------
+
+print("Individual Sections: Q2: Supervised Text Classification Model + Q3: Hyper Parameter Selection")
+
+# Miyoko Pang: Logistic Regression
+print("Miyoko Pang (TP067553)")
+print("\nQ2: Supervised Text Classification Model: Logistic Regression")
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+
+X = df['processed_message']
+y = df['label']
+
+# Train-test split
+start_time = time.time()
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+end_time = time.time()
+print(f"Data split. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# TF-IDF vectorization
+start_time = time.time()
+vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+end_time = time.time()
+print(f"TF-IDF vectorization complete. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Train logistic regression
+start_time = time.time()
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_vec, y_train)
+end_time = time.time()
+print(f"Model trained. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Predict
+start_time = time.time()
+y_pred = model.predict(X_test_vec)
+end_time = time.time()
+print(f"Prediction complete. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Results
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+
+print("\nQ3: Hyper Parameter Selection - Logistic Regression")
+
+from sklearn.model_selection import GridSearchCV
+
+params = {
+    'C': [0.01, 0.1, 1, 10],
+    'penalty': ['l2'],
+    'solver': ['liblinear', 'saga'],
+    'max_iter': [100, 200]
+}
+
+start_time = time.time()
+grid = GridSearchCV(LogisticRegression(), params, cv=5, scoring='f1', verbose=1)
+grid.fit(X_train_vec, y_train)
+end_time = time.time()
+
+print("Best Params:", grid.best_params_)
+print(f"Grid Search Time: {(end_time - start_time) * 1000000:.2f} µs")
+
+print("-------------------")
+
+# Shu Hui: KNN
+print("Shu Hui")
+print("\nQ2: Supervised Text Classification Model: KNN")
+
+print("\nQ3: Hyper Parameter Selection - KNN")
+
+print("-------------------")
+
+# Yi Jing
+print("Yi Jing")
+print("\nQ2: Supervised Text Classification Model: ?")
+
+print("\nQ3: Hyper Parameter Selection - ?")
+

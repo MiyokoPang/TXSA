@@ -60,8 +60,6 @@ end = time.time()
 print_in_chunks(tokenization, 5)
 print(f"Time taken: {(end - start) * 1000000:.2f} ms")
 
-print('-----------------------------')
-
 # Q1.3: Stop Words & Punctuation Removal - Yi Jing
 print("Q1.3 Stop Words & Punctuation Removal")
 start_time = time.time()
@@ -98,6 +96,8 @@ print_in_chunks(found_stopwords)
 
 print(f"\nTotal Stop Words Removed: {len(found_stopwords)}")
 print(f"Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+print('-----------------------------')
 
 # Q2 Form Word Stemming
 # Regular Expression function - Yi Jing
