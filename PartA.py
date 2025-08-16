@@ -1,31 +1,6 @@
-import time
-import json
-import pprint
-from pprint import pprint
-import nltk
-from textblob import TextBlob
-import re
-import string
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import PorterStemmer, LancasterStemmer
-from nltk import pos_tag, FreqDist, ConditionalFreqDist, CFG
-from nltk.util import bigrams
-from nltk.tag import RegexpTagger
-from nltk.probability import ConditionalProbDist, MLEProbDist, LidstoneProbDist
-from nltk.parse.chart import ChartParser
-from nltk.lm import MLE, Laplace
-from nltk.lm.preprocessing import padded_everygram_pipeline
-from nltk.util import ngrams
 
-# Downloads
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
 
-# Function for cleaner display format - Miyoko
-def print_in_chunks(token_list, chunk_size=5):
-    for i in range(0, len(token_list), chunk_size):
-        print(token_list[i:i+chunk_size])
+
 
 # -----------------------------
 # Data_1.txt Import
@@ -186,8 +161,6 @@ for word, tag in tagged:
     print(f"{word:<10} => {tag}")
 print(f"\nTime taken: {(end_time - start_time) * 1000000:.2f} ms")
 
-print('-----------------------------')
-
 # Possible Parse Trees - Miyoko and Yi Jing
 sentence = re.sub(r'[^\w\s]', '', data_2).lower().split()
 print("Tokens:", sentence)
@@ -216,6 +189,8 @@ else:
         tree.pretty_print()
         tree.draw()
 print(f"\nTime taken to generate parse tree: {(end - start) * 1000000:.2f} ms")
+
+print('-----------------------------')
 
 # -----------------------------
 # Data_3.txt Import
