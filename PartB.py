@@ -15,18 +15,13 @@ from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
 from collections import Counter
 
-# Function to print in chunks
-def print_in_chunks(token_list, chunk_size=5):
-    for i in range(0, len(token_list), chunk_size):
-        print(token_list[i:i+chunk_size])
-
 # Download required resources
 import nltk
 nltk.download('punkt')
 nltk.download('stopwords')
 
 # Load dataset
-print("Loading dataset...")
+print("Loading dataset")
 path_dir = Path(__file__).resolve().parent
 df_dir = path_dir / "sentiment_tweets3.csv"
 df = pd.read_csv(df_dir)
@@ -53,7 +48,6 @@ def preprocess_text(text):
 
 print("Preprocessing text (stopword removal + stemming)")
 df['processed_message'] = df['clean_message'].apply(preprocess_text)
-
 
 # 1. Class Distribution 
 print("\nQ1.1: Class Distribution")
@@ -133,7 +127,7 @@ print(f"Data split. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
 # TF-IDF vectorization
 start_time = time.time()
-vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
+vectorizer = TfidfVectorizer( max_features=5000)
 X_train_vec = vectorizer.fit_transform(X_train)
 X_test_vec = vectorizer.transform(X_test)
 end_time = time.time()
@@ -176,7 +170,7 @@ grid.fit(X_train_vec, y_train)
 end_time = time.time()
 
 print("Best Params:", grid.best_params_)
-print(f"Grid Search Time: {(end_time - start_time) * 1000000:.2f} µs")
+print(f"Grid Search Time: {(end_time - start_time) * 1000:.2f} ms")
 
 print("-------------------")
 
