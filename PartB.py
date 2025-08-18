@@ -178,7 +178,78 @@ print("-------------------")
 print("Shu Hui")
 print("\nQ2: Supervised Text Classification Model: KNN")
 
+import time
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, confusion_matrix
+
+# Features and labels
+X = df['processed_message']
+y = df['label']
+
+# Train-test split
+start_time = time.time()
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+end_time = time.time()
+print(f"Data split. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# TF-IDF vectorization
+start_time = time.time()
+vectorizer = TfidfVectorizer(stop_words='english', max_features=5000)
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+end_time = time.time()
+print(f"TF-IDF vectorization complete. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Train KNN
+start_time = time.time()
+knn = KNeighborsClassifier(n_neighbors=5)  # default = 5 neighbors
+knn.fit(X_train_vec, y_train)
+end_time = time.time()
+print(f"KNN model trained. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Prediction
+start_time = time.time()
+y_pred_knn = knn.predict(X_test_vec)
+end_time = time.time()
+print(f"Prediction complete. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Results
+print("\nConfusion Matrix:")
+print(confusion_matrix(y_test, y_pred_knn))
+
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred_knn))
+
 print("\nQ3: Hyper Parameter Selection - KNN")
+
+# Hyperparameter tuning
+params_knn = {
+    'n_neighbors': [3, 5, 7, 9, 11],
+    'weights': ['uniform', 'distance'],
+    'metric': ['euclidean', 'manhattan', 'cosine']
+}
+
+start_time = time.time()
+grid_knn = GridSearchCV(KNeighborsClassifier(), params_knn, cv=5, scoring='f1', verbose=1)
+grid_knn.fit(X_train_vec, y_train)
+end_time = time.time()
+
+print("Best Params for KNN:", grid_knn.best_params_)
+print(f"Grid Search Time: {(end_time - start_time) * 1000000:.2f} µs")
+
+# Evaluate best model
+best_knn = grid_knn.best_estimator_
+y_pred_best = best_knn.predict(X_test_vec)
+
+print("\nConfusion Matrix (Best KNN):")
+print(confusion_matrix(y_test, y_pred_best))
+
+print("\nClassification Report (Best KNN):")
+print(classification_report(y_test, y_pred_best))
 
 print("-------------------")
 
