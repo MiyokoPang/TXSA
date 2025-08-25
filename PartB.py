@@ -174,14 +174,14 @@ print(f"Grid Search Time: {(end_time - start_time) * 1000:.2f} ms")
 
 print("-------------------")
 
-# Shu Hui: KNN
+# Shu Hui: Naïve Bayes
 print("Shu Hui")
-print("\nQ2: Supervised Text Classification Model: KNN")
+print("\nQ2: Supervised Text Classification Model: Naïve Bayes")
 
 import time
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report, confusion_matrix
 
 # Features and labels
@@ -204,52 +204,52 @@ X_test_vec = vectorizer.transform(X_test)
 end_time = time.time()
 print(f"TF-IDF vectorization complete. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
-# Train KNN
+# Train Naïve Bayes
 start_time = time.time()
-knn = KNeighborsClassifier(n_neighbors=5)  # default = 5 neighbors
-knn.fit(X_train_vec, y_train)
+nb = MultinomialNB()  # default alpha=1.0
+nb.fit(X_train_vec, y_train)
 end_time = time.time()
-print(f"KNN model trained. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
+print(f"Naïve Bayes model trained. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
 # Prediction
 start_time = time.time()
-y_pred_knn = knn.predict(X_test_vec)
+y_pred_nb = nb.predict(X_test_vec)
 end_time = time.time()
 print(f"Prediction complete. Time taken: {(end_time - start_time) * 1000000:.2f} µs")
 
 # Results
 print("\nConfusion Matrix:")
-print(confusion_matrix(y_test, y_pred_knn))
+print(confusion_matrix(y_test, y_pred_nb))
 
 print("\nClassification Report:")
-print(classification_report(y_test, y_pred_knn))
+print(classification_report(y_test, y_pred_nb))
 
-print("\nQ3: Hyper Parameter Selection - KNN")
+print("\nQ3: Hyper Parameter Selection - Naïve Bayes")
 
-# Hyperparameter tuning
-params_knn = {
-    'n_neighbors': [3, 5, 7, 9, 11],
-    'weights': ['uniform', 'distance'],
-    'metric': ['euclidean', 'manhattan', 'cosine']
+# Hyperparameter tuning (alpha smoothing)
+params_nb = {
+    'alpha': [0.01, 0.1, 0.5, 1.0, 2.0],
+    'fit_prior': [True, False]
 }
 
 start_time = time.time()
-grid_knn = GridSearchCV(KNeighborsClassifier(), params_knn, cv=5, scoring='f1', verbose=1)
-grid_knn.fit(X_train_vec, y_train)
+grid_nb = GridSearchCV(MultinomialNB(), params_nb, cv=5, scoring='f1', verbose=1)
+grid_nb.fit(X_train_vec, y_train)
 end_time = time.time()
 
-print("Best Params for KNN:", grid_knn.best_params_)
+print("Best Params for Naïve Bayes:", grid_nb.best_params_)
 print(f"Grid Search Time: {(end_time - start_time) * 1000000:.2f} µs")
 
 # Evaluate best model
-best_knn = grid_knn.best_estimator_
-y_pred_best = best_knn.predict(X_test_vec)
+best_nb = grid_nb.best_estimator_
+y_pred_best_nb = best_nb.predict(X_test_vec)
 
-print("\nConfusion Matrix (Best KNN):")
-print(confusion_matrix(y_test, y_pred_best))
+print("\nConfusion Matrix (Best NB):")
+print(confusion_matrix(y_test, y_pred_best_nb))
 
-print("\nClassification Report (Best KNN):")
-print(classification_report(y_test, y_pred_best))
+print("\nClassification Report (Best NB):")
+print(classification_report(y_test, y_pred_best_nb))
+
 
 print("-------------------")
 
